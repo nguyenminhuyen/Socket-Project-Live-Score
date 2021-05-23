@@ -1,0 +1,16 @@
+{
+    "account": [
+        {
+            "usr": "nguyen",
+            "psw": "123"
+        },
+        {
+            "usr": "minh",
+            "psw": "456"
+        },
+        {
+            "usr": "uyen",
+            "psw": "789"
+        }
+    ]
+}
