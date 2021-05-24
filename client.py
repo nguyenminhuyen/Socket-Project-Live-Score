@@ -50,6 +50,11 @@ def regist():
         print('Tên đăng nhập tồn tại')
         return False
 
+def matchDetail():
+    id = input('Match ID: ')
+    sendData(client, id)
+    detail = receive(client)
+    print(detail)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
     server_address = (HOST, PORT)
@@ -75,7 +80,16 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
                             break
                     else:
                         break
-                    
+            
+            elif (msg == "DETAIL"):
+                while True:
+                    msg = input('Client: ')
+                    sendData(client, msg)
+                    if (msg == "DET"):
+                        matchDetail()
+                    else:
+                        break
+
             else:
                 break
             

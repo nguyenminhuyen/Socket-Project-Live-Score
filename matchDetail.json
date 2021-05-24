@@ -1,0 +1,53 @@
+{
+    "_comment_": ["time = [số phút, HT, FT], số phút -> xem type",
+                "time = HT, FT -> score",
+                "type = [goal, goalPen, RedCard, YellowCard]",
+                "type = goal, goalPen -> xem team, player, assist (nếu type = goal), score",
+                "type = Red/Yellow Card -> xem team, player"
+    ],
+
+    "match": 
+    [
+        {
+            "id": "1234",
+            "events": 
+            [
+                {
+                    "time" : "12",
+                    "type": "goal",
+                    "team": "Machester United",
+                    "player": "Rashford",
+                    "assist": "Pogba",
+                    "score": "1-0"
+                },
+                {
+                    "time": "40",
+                    "type": "goalPen",
+                    "team": "Machester United",
+                    "player": "Bruno",
+                    "score": "2-0"
+                },
+                {
+                    "time": "HT",
+                    "score": "2-0"
+                },
+                {
+                    "time": "51",
+                    "type": "RedCard",
+                    "team": "Machester City",
+                    "player": "Cancelo"
+                },
+                {
+                    "time": "56",
+                    "type": "YellowCard",
+                    "team": "Machester City",
+                    "player": "Sterling"
+                },
+                {
+                    "time": "FT",
+                    "score": "2-0"
+                }
+            ]
+        }
+    ]
+}

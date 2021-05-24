@@ -69,6 +69,20 @@ def regist():
     fd.close()
     return True
 
+def matchDetail(sock):
+    id = receive(sock)
+    f = open("matchDetail.json", "r")
+    data = json.load(f)
+    f.close()
+
+    for mch in data["match"]:
+        if mch["id"] == id:
+            sendData(sock, json.dumps(mch["events"]))
+            return True
+
+    sendData(sock, '0')
+    return False
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
     s.listen()
@@ -92,6 +106,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         flag = regist()
                         if flag:
                             break
+                    else:
+                        break
+            
+            elif (str == "DETAIL"):
+                str = receive(conn)
+                while True:
+                    if (str == "DET"):
+                        matchDetail(conn)
                     else:
                         break
 
