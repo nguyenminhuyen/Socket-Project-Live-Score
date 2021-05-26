@@ -1,8 +1,10 @@
 import socket
+import json
 import time
 from io import BytesIO
 
-HOST = '127.0.0.1'
+hostname = socket.gethostname()
+HOST = socket.gethostbyname(hostname) 
 PORT = 65432        
 
 BUFF_SIZE = 1024
@@ -50,10 +52,11 @@ def regist():
         print('Tên đăng nhập tồn tại')
         return False
 
+# Xem chi tiết trận đấu 
 def matchDetail():
     id = input('Match ID: ')
     sendData(client, id)
-    detail = receive(client)
+    detail = json.loads(receive(client))
     print(detail)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
