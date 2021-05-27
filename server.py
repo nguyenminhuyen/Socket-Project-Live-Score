@@ -42,7 +42,7 @@ def receive(sock):
 class runServerGUI(object):
     def __init__(self,master):
         self.master = master
-        self.sock = s
+        self.sock = None
         self.threadCount = 0
         self.master.title("Server")
         self.master.geometry("500x400")
@@ -81,21 +81,21 @@ class runServerGUI(object):
 
     def createThread(self, nVar):
         #self.master1.withdraw()
-        self.sock.bind((HOST, PORT))
-        self.sock.listen(int(nVar.get()))
+        s.bind((HOST, PORT))
+        s.listen(int(nVar.get()))
         try:
             while True:
-                client, addr = self.sock.accept()
+                self.sock, addr = s.accept()
                 print('Connected by', addr)
                 msg = " Connected by: " + str(addr) + "\n"
                 self.run(msg)
-                start_new_thread (self.threadClient, (client, ))
+                start_new_thread(self.threadClient,())
                 self.threadCount += 1
                 print("Thread num: ", self.threadCount)
                 msg = "Thread num: " + str(self.threadCount) + "\n"
                 self.run(msg)
         except KeyboardInterrupt:
-            self.sock.close()
+            s.close()
 
     def threadClient(self):
         str = ""
