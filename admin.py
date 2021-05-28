@@ -55,9 +55,9 @@ def addMatch(sock):
     else:
         print('Thêm trận đấu không thành công')
 
-def updMatch(sock, mode):   # mode 0: update score, mode 1: update time
-    # type(data) = dict, data = {"id", "score"/"time"}
-    data = {"id": "1234", "time": "80"}
+def updMatch(sock):  
+    # type(data) = dict, data = {"id", "time", "score"}
+    data = {"id": "1234", "time": "80", "score": "4-0"}
     sendData(sock, json.dumps(data))
     res = receive(sock)
     if (res == '1'):
@@ -107,17 +107,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sAdmin:
                         if (msg == "ADD"):
                             addMatch(sAdmin)
                     
-                    elif (msg == "UPDSC"):
+                    elif (msg == "UPDMT"):
                         msg = input('Client: ')
                         sendData(sAdmin, msg)
                         if (msg == "UPD"):
-                            updMatch(sAdmin, 0)
-
-                    elif (msg == "UPDTM"):
-                        msg = input('Client: ')
-                        sendData(sAdmin, msg)
-                        if (msg == "UPD"):
-                            updMatch(sAdmin, 1)
+                            updMatch(sAdmin)
 
                     elif (msg == "UPDEV"):
                         msg = input('Client: ')
