@@ -94,7 +94,7 @@ class adminGUI(object):
     def addMatch(self, IDVar, timeVar, team1Var, team2Var, scoreVar):
         sendData(self.sclient, "ADDMT")
         #type(str) = dict
-        str = {"id": IDVar.get(), "time": team1Var.get(), "team1": team1Var.get(),"score": scoreVar.get(), "team2": team2Var.get()}
+        str = {"id": IDVar.get(), "time": timeVar.get(), "team1": team1Var.get(),"score": scoreVar.get(), "team2": team2Var.get()}
         sendData(self.sclient,json.dumps(str))
         signal = receive(self.sclient)
         if (signal == '0'):
@@ -296,16 +296,10 @@ class userGUI(object):
     def listMatch(self):
         sendData(self.sclient, "LISTMT")
         print("LISTMT")
-        mtchs =[]
-        while True:
-            data = receive(sclient)
-            if (data == '0'):
-                break
-            data = json.loads(data)
-            print(data)
-            mtchs.append(data)
+        data = receive(sclient)
+        data = json.loads(data)
         cnt = 0
-        for mtch in mtchs:
+        for mtch in data["list"]:
             self.treev.insert("", 'end', iid = cnt, text ="", values =(mtch['id'], mtch['time'], mtch['team1'], mtch['score'], mtch['team2']))
             cnt += 1
         return
@@ -347,17 +341,13 @@ class userGUI(object):
         sendData(self.sclient, "MTCDT")
         IDM = self.IDMVar.get()
         sendData(self.sclient, IDM)
-        mtchs = []
-        while True:
-            data = receive(sclient)
-            if (data == '0'):
-                break
-            data = json.loads(data)
-            print(data)
-            mtchs.append(data)
+        data = receive(sclient)
+        data = json.loads(data)
+        print(data)
         cnt = 0
-        for mtch in mtchs:
-            self.treev.insert("", 'end', iid = cnt, text ="", values =(mtch['id'], mtch['time'], mtch['type'], mtch['team'], mtch['player'], mtch['assist'], mtch['score']))
+        for mtch in data["events"]:
+            mtch["id"] = IDM
+            self.treev1.insert("", 'end', iid = cnt, text ="", values =(mtch['id'], mtch['time'], mtch['type'], mtch['team'], mtch['player'], mtch['assist'], mtch['score']))
             cnt += 1
         return
         

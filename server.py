@@ -112,10 +112,9 @@ def matchDetail(sock):
             pos2 = i
 
     if (pos1 != -1 and pos2 != -1):
-        for evn in data["match"][pos2]["events"]:
-            str = {'id': id, 'time': evn['time'], 'type' : evn['type'], 'team': evn['team'], 'player': evn['player'], 'assist': evn['assist'], 'score': evn['score']}
-            sendData(sock, json.dumps(str))
-            print(str)
+        res = general["list"][pos1]
+        res["events"] = data["match"][pos2]["events"]
+        sendData(sock, json.dumps(res))
 
     sendData(sock, '0')
     return False
@@ -124,12 +123,9 @@ def listMatch(sock):
     f = open("listmatch.json", "r")
     data = json.load(f)
     f.close()
-    #sendData(sock, json.dumps(data["list"]))
-    #print(data["list"])
-    for sc in data["list"]:
-        sendData(sock, json.dumps(sc))
-        print(sc)
-    sendData(sock, '0')
+    sendData(sock, json.dumps(data))
+    
+    #sendData(sock, '0')
     return False
     
 ### ADMIN ###
