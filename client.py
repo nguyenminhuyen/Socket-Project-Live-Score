@@ -6,6 +6,9 @@ from tkinter import filedialog
 from functools import partial
 from socket import AF_INET, socket, SOCK_STREAM
 import json
+import datetime
+from datetime import timedelta
+from datetime import datetime
 BUFF_SIZE = 1024
 
 #Create socket
@@ -300,6 +303,38 @@ class userGUI(object):
         data = json.loads(data)
         cnt = 0
         for mtch in data["list"]:
+            realTime = datetime.now()
+            endTime = datetime.strptime(mtch["time"], '%Y-%m-%d %H:%M') + timedelta(minutes = 110) # 90 mins official + 5 mins added time + 15 mins between 2 half
+            if (realTime >= endTime):    # Trận đấu đã end
+                mtch["time"] = "FT"
+            else:   # Trận đấu chưa end
+                mtch["score"] = ""
+            self.treev.insert("", 'end', iid = cnt, text ="", values =(mtch['id'], mtch['time'], mtch['team1'], mtch['score'], mtch['team2']))
+            cnt += 1
+        return
+
+    def listMatchRealTime(self):
+        sendData(self.sclient, "LISTMRT")
+        print("LISTMRT")
+        data = receive(sclient)
+        data = json.loads(data)
+        cnt = 0
+        for mtch in data["list"]:
+            realTime = datetime.now()
+            startTime = datetime.strptime(mtch["time"], '%Y-%m-%d %H:%M')
+            endTime = startTime + timedelta(minutes = 105)      # 90 mins official + 15 mins between 2 half
+            if (realTime >= endTime):    # Trận đấu đã end
+                mtch["time"] = "FT"
+            elif (realTime >= startTime):   # Trận đấu đang diễn ra
+                matchTime = realTime - startTime
+                sec = matchTime.seconds
+                min = sec // 60
+                if (min > 45 and min < 60):
+                    mtch["time"] = "HF"
+                elif (min <= 45):
+                    mtch["time"] = str(min)
+                else:
+                    mtch["time"] = str(min - 15)
             self.treev.insert("", 'end', iid = cnt, text ="", values =(mtch['id'], mtch['time'], mtch['team1'], mtch['score'], mtch['team2']))
             cnt += 1
         return
