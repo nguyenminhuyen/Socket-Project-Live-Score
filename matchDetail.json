@@ -1,50 +1,86 @@
 {
-    "_comment_": ["time = [số phút, HT, FT], số phút -> xem type",
-                "time = HT, FT -> score",
-                "type = [goal, goalPen, RedCard, YellowCard]",
-                "type = goal, goalPen -> xem team, player, assist (nếu type = goal), score",
-                "type = Red/Yellow Card -> xem team, player"
+    "_comment_": [
+        "time = [s\u00e1\u00bb\u2018 ph\u00c3\u00bat, HT, FT], s\u00e1\u00bb\u2018 ph\u00c3\u00bat -> xem type",
+        "time = HT, FT -> score",
+        "type = [goal, goalPen, RedCard, YellowCard]",
+        "type = goal, goalPen -> xem team, player, assist (n\u00e1\u00ba\u00bfu type = goal), score",
+        "type = Red/Yellow Card -> xem team, player"
     ],
-
-    "match": 
-    [
+    "match": [
         {
             "id": "1234",
-            "events": 
-            [
+            "team1": "MU",
+            "team2": "MC",
+            "score": "2-0",
+            "time": "2021-05-29 10:30",
+            "events": [
                 {
-                    "time" : "12",
+                    "time": "14",
                     "type": "goal",
-                    "team": "Machester United",
-                    "player": "Rashford",
-                    "assist": "Pogba",
+                    "team": "MU",
+                    "player": "Pogba",
+                    "assist": "Uyen",
                     "score": "1-0"
                 },
                 {
                     "time": "40",
-                    "type": "goalPen",
+                    "type": "Penalty Goal",
                     "team": "Machester United",
                     "player": "Bruno",
+                    "assist": "",
                     "score": "2-0"
                 },
                 {
                     "time": "HT",
+                    "type": "",
+                    "team": "",
+                    "player": "",
+                    "assist": "",
                     "score": "2-0"
                 },
                 {
                     "time": "51",
-                    "type": "RedCard",
+                    "type": "Red Card",
                     "team": "Machester City",
-                    "player": "Cancelo"
+                    "player": "Cancelo",
+                    "assist": "",
+                    "score": ""
                 },
                 {
                     "time": "56",
-                    "type": "YellowCard",
+                    "type": "Yellow Card",
                     "team": "Machester City",
-                    "player": "Sterling"
+                    "player": "Sterling",
+                    "assist": "",
+                    "score": ""
                 },
                 {
                     "time": "FT",
+                    "type": "",
+                    "team": "",
+                    "player": "",
+                    "assist": "",
+                    "score": "2-0"
+                }
+            ]
+        },
+        {
+            "id": "1235",
+            "events": [
+                {
+                    "time": "14",
+                    "type": "goal",
+                    "team": "MU",
+                    "player": "Pogba",
+                    "assist": "Uyen",
+                    "score": "1-0"
+                },
+                {
+                    "time": "20",
+                    "type": "goal",
+                    "team": "MU",
+                    "player": "Thi",
+                    "assist": "Uyen",
                     "score": "2-0"
                 }
             ]
