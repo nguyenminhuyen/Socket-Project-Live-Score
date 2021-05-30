@@ -1,8 +1,6 @@
-import datetime
 import queue
 import logging
 import signal
-import time
 import threading
 from tkinter import *
 from tkinter import ttk
