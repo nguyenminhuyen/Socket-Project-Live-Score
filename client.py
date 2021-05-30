@@ -374,7 +374,7 @@ class userGUI(object):
             return
         data = json.loads(data)
         cnt = 0
-        for mtch in data["list"]:
+        for mtch in data["match"]:
             realTime = datetime.now()
             endTime = datetime.strptime(mtch["time"], '%Y-%m-%d %H:%M') + timedelta(minutes = 110) # 90 mins official + 5 mins added time + 15 mins between 2 half
             if (realTime >= endTime):    # Trận đấu đã end
@@ -398,7 +398,7 @@ class userGUI(object):
             return
         data = json.loads(data)
         cnt = 0
-        for mtch in data["list"]:
+        for mtch in data["match"]:
             realTime = datetime.now()
             startTime = datetime.strptime(mtch["time"], '%Y-%m-%d %H:%M')
             endTime = startTime + timedelta(minutes = 105)      # 90 mins official + 15 mins between 2 half
@@ -473,12 +473,15 @@ class userGUI(object):
         if (data == -100):
             messagebox.showerror("Error", "Server đã ngừng kết nối")
             return
-        data = json.loads(data)
-        cnt = 0
-        for mtch in data["events"]:
-            mtch["id"] = IDM
-            self.treev1.insert("", 'end', iid = cnt, text ="", values =(mtch['id'], mtch['time'], mtch['type'], mtch['team'], mtch['player'], mtch['assist'], mtch['score']))
-            cnt += 1
+        elif (data == '0'):
+            messagebox.showinfo("Info", "Id trận đấu không tồn tại")
+        else: 
+            data = json.loads(data)
+            cnt = 0
+            for mtch in data["events"]:
+                mtch["id"] = IDM
+                self.treev1.insert("", 'end', iid = cnt, text ="", values =(mtch['id'], mtch['time'], mtch['type'], mtch['team'], mtch['player'], mtch['assist'], mtch['score']))
+                cnt += 1
         return
         
 #Log In

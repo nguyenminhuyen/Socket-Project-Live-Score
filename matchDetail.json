@@ -1,11 +1,4 @@
 {
-    "_comment_": [
-        "time = [s\u00e1\u00bb\u2018 ph\u00c3\u00bat, HT, FT], s\u00e1\u00bb\u2018 ph\u00c3\u00bat -> xem type",
-        "time = HT, FT -> score",
-        "type = [goal, goalPen, RedCard, YellowCard]",
-        "type = goal, goalPen -> xem team, player, assist (n\u00e1\u00ba\u00bfu type = goal), score",
-        "type = Red/Yellow Card -> xem team, player"
-    ],
     "match": [
         {
             "id": "1234",
@@ -18,14 +11,14 @@
                     "time": "14",
                     "type": "goal",
                     "team": "MU",
-                    "player": "Pogba",
-                    "assist": "Uyen",
+                    "player": "Rashford",
+                    "assist": "Pogba",
                     "score": "1-0"
                 },
                 {
                     "time": "40",
                     "type": "Penalty Goal",
-                    "team": "Machester United",
+                    "team": "MU",
                     "player": "Bruno",
                     "assist": "",
                     "score": "2-0"
@@ -41,7 +34,7 @@
                 {
                     "time": "51",
                     "type": "Red Card",
-                    "team": "Machester City",
+                    "team": "MC",
                     "player": "Cancelo",
                     "assist": "",
                     "score": ""
@@ -49,7 +42,7 @@
                 {
                     "time": "56",
                     "type": "Yellow Card",
-                    "team": "Machester City",
+                    "team": "MC",
                     "player": "Sterling",
                     "assist": "",
                     "score": ""
@@ -66,24 +59,27 @@
         },
         {
             "id": "1235",
-            "events": [
-                {
-                    "time": "14",
-                    "type": "goal",
-                    "team": "MU",
-                    "player": "Pogba",
-                    "assist": "Uyen",
-                    "score": "1-0"
-                },
-                {
-                    "time": "20",
-                    "type": "goal",
-                    "team": "MU",
-                    "player": "Thi",
-                    "assist": "Uyen",
-                    "score": "2-0"
-                }
-            ]
+            "time": "2021-6-1 16:00",
+            "team1": "MU",
+            "score": "0-0",
+            "team2": "Chelsea",
+            "events": []
+        },
+        {
+            "id": "1236",
+            "time": "2021-5-30 20:00",
+            "team1": "MU",
+            "score": "0-0",
+            "team2": "Arsenal",
+            "events": []
+        },
+        {
+            "id": "2345",
+            "time": "2021-6-10 1:00",
+            "team1": "Real",
+            "score": "0-0",
+            "team2": "Barca",
+            "events": []
         }
     ]
 }

@@ -9,7 +9,7 @@ HOST = socket.gethostbyname(hostname)
 PORT = 65432      
 
 BUFF_SIZE = 1024
-NClient = 5                   # số client tối đa kết nối đồng thời đến server
+NClient = 5                   
 threadCount = 0
 
 ADMIN_USR = "admin"     
@@ -150,37 +150,28 @@ class Server:
         f = open("matchDetail.json", "r")
         data = json.load(f)
         f.close()
-        
-        f1 = open("listmatch.json", "r")
-        general = json.load(f1)
-        f1.close()
 
-        pos1 = -1
-        pos2 = -1
-
-        for i in range(0,len(general["list"])):
-            if (general["list"][i]["id"] == id):
-                pos1 = i
+        pos = -1
 
         for i in range(0,len(data["match"])):
             if (data["match"][i]["id"] == id):
-                pos2 = i
+                pos = i
 
-        if (pos1 != -1 and pos2 != -1):
-            res = general["list"][pos1]
-            res["events"] = data["match"][pos2]["events"]
+        if (pos != -1):
+            res = data["match"][pos]
+            res["events"] = data["match"][pos]["events"]
             self.sendData(sock, json.dumps(res))
-            self.logger.log(logging.INFO,"Client " + str(client_number) + ": Mở match detail thành công")
+            self.logger.log(logging.INFO,"Client " + str(client_number) + ": Mở chi tiết trận đấu thành công")
+            return True
         else:
-            self.sendData(sock, '-1') #Khong ton tai match detail
-            self.logger.log(logging.ERROR,"Client " + str(client_number) + ": Không tồn tại match detail")
-        self.sendData(sock, '0')
-        return False
+            self.sendData(sock, '0') # Khong ton tai match detail
+            self.logger.log(logging.ERROR,"Client " + str(client_number) + ": Không tồn tại id trận đấu")
+            return False
 
     #List Match
     def listMatch(self,sock):
         client_number = self.port_num_clients[sock.getpeername()[1]]
-        f = open("listmatch.json", "r")
+        f = open("matchDetail.json", "r")
         data = json.load(f)
         f.close()
         self.sendData(sock, json.dumps(data))
@@ -196,23 +187,26 @@ class Server:
         data_add = self.receive(sock)
         data_add = json.loads(data_add)
         self.logger.log(logging.CRITICAL,str(data_add))
-        f = open("listmatch.json", "r+")
+        f = open("matchDetail.json", "r+")
         data = json.load(f)
 
-        for match in data["list"]:
+        for match in data["match"]:
             if (match["id"] == data_add["id"]):     # ID trận đã tồn tại
                 self.sendData(sock, '0')     # Thêm trận đấu không thành công
                 self.logger.log(logging.ERROR,"Client " + str(client_number) + ": ID trận đã tồn tại - Thêm trận đấu không thành công")
                 f.close()
                 return False
         
-        data["list"].append(data_add)
+        data_add["events"] = []
+        data["match"].append(data_add)
         data.update(data)
         f.seek(0)
         json.dump(data, f, indent = 4)
+        f.close()
+
         self.sendData(sock, '1')     # Thêm trận đấu thành công
         self.logger.log(logging.INFO,"Client " + str(client_number) + ": Thêm trận đấu thành công")
-        f.close()
+        
         return True
 
     # Cập nhật trận đấu (score, time)
@@ -220,28 +214,31 @@ class Server:
         client_number = self.port_num_clients[sock.getpeername()[1]]
         data_add = self.receive(sock)  
         data_add = json.loads(data_add) 
-        self.logger.log(logging.CRITICAL,str(data_add))   
-        f = open("listmatch.json", "r+")
-        data = json.load(f)
-        matches = data["list"]
-        pos = -1
+        self.logger.log(logging.CRITICAL,str(data_add))  
 
+        f = open("matchDetail.json", "r+")
+        data = json.load(f)
+        matches = data["match"]
+
+        pos = -1
         for i in range (0,len(matches)):
             if (matches[i]["id"] == data_add["id"]):
                 pos = i
 
         if (pos != -1):
-            data["list"][pos]["time"] = data_add["time"]
-            data["list"][pos]["score"] = data_add["score"]
+            data["match"][pos]["time"] = data_add["time"]
+            data["match"][pos]["score"] = data_add["score"]
+            data.update(data)
             f.seek(0)
             json.dump(data, f, indent = 4)
-            self.sendData(sock, '1')     # Cập nhật thành công
-            self.logger.log(logging.INFO,"Client " + str(client_number) + ": Cập nhật trận đấu (score, time) thành công")
             f.close()
+
+            self.sendData(sock, '1')     # Cập nhật thành công
+            self.logger.log(logging.INFO,"Client " + str(client_number) + ": Cập nhật thời gian và tỉ số thành công")
             return True
         
         self.sendData(sock, '0')     # Cập nhật thất bại
-        self.logger.log(logging.ERROR,"Client " + str(client_number) + ": Cập nhật trận đấu (score, time) thất bại")
+        self.logger.log(logging.ERROR,"Client " + str(client_number) + ": Cập nhật thời gian và tỉ số thất bại")
         f.close()
         return False
 
@@ -251,23 +248,28 @@ class Server:
         data_add = self.receive(sock)  
         data_add = json.loads(data_add)    # Mỗi lần thêm 1 event trong 1 trận
         self.logger.log(logging.CRITICAL,str(data_add))
+
         f = open("matchDetail.json", "r+")
         data = json.load(f)
         matches = data["match"]
-        pos = -1
 
+        pos = -1
         for i in range (0,len(matches)):
             if (matches[i]["id"] == data_add["id"]):
                 pos = i
         
         if (pos != -1):
             data["match"][pos]["events"].append(data_add["events"])
+            if (data_add["events"]["type"] == "goal" or data_add["events"]["type"] == "goalPen"):
+                data["match"][pos]["score"] = data_add["events"]["score"]
             data.update(data)
             f.seek(0)
             json.dump(data, f, indent = 4)
+            f.close()
+
             self.sendData(sock, '1')     # Thêm sự kiện thành công
             self.logger.log(logging.INFO,"Client " + str(client_number) + ": Thêm sự kiện thành công")
-            f.close()
+            
             return True
         
         self.sendData(sock, '0')     # Thêm sự kiện thất bại

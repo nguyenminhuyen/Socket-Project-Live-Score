@@ -13,7 +13,7 @@ from server import*
 
 logger = logging.getLogger(__name__)
 
-NClient = 5                  # số client tối đa kết nối đồng thời đến server
+NClient = 5                  
 
 class QueueHandler(logging.Handler):
     def __init__(self, log_queue):
@@ -137,7 +137,7 @@ def main():
     root.resizable(0,0)
     ttk.Label(root, text = "LIVE SCORE", font = ('Times', 30, 'bold')).pack(side = TOP, pady = 2)
     ttk.Label(root, text = "Server", font = ('Times', 20)).pack(side = TOP, pady = 5)
-    ttk.Label(root, text = "Nhập số client cho phép kết nối: ").pack(side = TOP, pady = 2)
+    ttk.Label(root, text = "Nhập số client cho phép kết nối đồng thời: ").pack(side = TOP, pady = 2)
     nVar = StringVar()
     nEntry = ttk.Entry(root,textvariable= nVar, width = 50).pack(side = TOP, pady = 5)
     nFunc = partial(submitNumThread,root, nVar)
