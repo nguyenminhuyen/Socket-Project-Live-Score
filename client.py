@@ -5,6 +5,7 @@ from tkinter import messagebox
 from tkinter import filedialog
 from functools import partial
 from socket import AF_INET, socket, SOCK_STREAM
+import socket
 import json
 import datetime
 from datetime import timedelta
@@ -13,28 +14,40 @@ BUFF_SIZE = 1024
 
 #Create socket
 try:
-    sclient = socket(AF_INET, SOCK_STREAM)
+    sclient = socket.socket(AF_INET, SOCK_STREAM)
 except socket.error:
     messagebox.showerror("Error", "Lỗi không thể tạo socket")
 
 def sendData(sclient, msg):
-    sclient.sendall(bytes(msg, "utf8"))
+    try:
+        sclient.sendall(bytes(msg, "utf8"))
+        return True
+    except socket.error:
+        return False
 
 def receive(sclient): 
     data = b''
     while True:
         while True:
-            part = sclient.recv(BUFF_SIZE)
-            data += part
-            if len(part) < BUFF_SIZE:
-                break
+            try:
+                part = sclient.recv(BUFF_SIZE)
+                data += part
+                if len(part) < BUFF_SIZE:
+                    break
+            except socket.error:
+                return -100
         if data:
             break
     return data.decode().strip()
 
+def closing():
+    #sendData(sclient, "QUIT")
+    root.destroy()
+
 
 class adminGUI(object):
     def __init__(self,master):
+        master.withdraw()
         self.master = Toplevel(master)
         self.sclient = sclient
         self.master.title("Client admin") 
@@ -45,8 +58,15 @@ class adminGUI(object):
         Button(self.master, text = "Thêm trận", height = 2, width = 30, command = self.addMatchGUI).pack(side = TOP, pady = 2)
         Button(self.master, text = "Cập nhật thời gian và tỉ số", height = 2, width = 30, command = self.upMatchGUI).pack(side = TOP, pady = 2)
         Button(self.master, text = "Cập nhật event", height = 2, width = 30, command = self.upEventGUI).pack(side = TOP, pady = 2)
+        self.master.protocol("WM_DELETE_WINDOW", self.closeClient)
         self.master.mainloop()
 
+    #CloseClient
+    def closeClient(self):
+        sendData(sclient, "QUIT")
+        self.master.destroy()
+        closing()
+    
     #Add Match
     def addMatchGUI(self):
         self.master1 = Toplevel(self.master)
@@ -94,13 +114,23 @@ class adminGUI(object):
         addMatchButton.pack(side = TOP, pady = 5)
         self.master1.mainloop()
 
+
     def addMatch(self, IDVar, timeVar, team1Var, team2Var, scoreVar):
-        sendData(self.sclient, "ADDMT")
+        flag = sendData(self.sclient, "ADDMT")
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         #type(str) = dict
         str = {"id": IDVar.get(), "time": timeVar.get(), "team1": team1Var.get(),"score": scoreVar.get(), "team2": team2Var.get()}
-        sendData(self.sclient,json.dumps(str))
+        flag = sendData(self.sclient,json.dumps(str))
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         signal = receive(self.sclient)
-        if (signal == '0'):
+        if (signal == -100):
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
+        elif (signal == '0'):
             messagebox.showinfo("Info", "Thêm trận đấu không thành công")
             return False
         else:
@@ -141,11 +171,20 @@ class adminGUI(object):
         self.master1.mainloop()
     
     def upMatch(self, IDVar, timeVar, scoreVar):
-        sendData(self.sclient, "UPDMT")
+        flag = sendData(self.sclient, "UPDMT")
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         str = {"id": IDVar.get(), "time": timeVar.get(), "score": scoreVar.get()}
-        sendData(self.sclient,json.dumps(str))
+        flag = sendData(self.sclient,json.dumps(str))
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         signal = receive(self.sclient)
-        if (signal == '0'):
+        if (signal == -100):
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
+        elif (signal == '0'):
             messagebox.showinfo("Info", "Cập nhật trận đấu không thành công")
             return False
         else:
@@ -221,21 +260,23 @@ class adminGUI(object):
         self.master1.mainloop()
     
     def upEvent(self, IDMVar, timeVar, teamVar, playerVar, assistVar, scoreVar):
-        sendData(self.sclient, "UPDEV")
-        print("UPDEV")
-        print(IDMVar.get() + "\n")
-        print(teamVar.get() + "\n")
-        print(playerVar.get() + "\n")
-        print(scoreVar.get() + "\n")
+        flag = sendData(self.sclient, "UPDEV")
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         assist = assistVar.get()
         if (assist == None):
             assist = ""
-        print(assist + "\n")
         str = {"id": IDMVar.get(), "events": {"time": timeVar.get(), "type": self.TypeChoosen.get(), "team": teamVar.get(), "player": playerVar.get(), "assist": assist, "score": scoreVar.get()} }
-        sendData(self.sclient,json.dumps(str))
+        flag = sendData(self.sclient,json.dumps(str))
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         signal = receive(self.sclient)
-        print(signal)
-        if (signal == '0'):
+        if (signal == -100):
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
+        elif (signal == '0'):
             messagebox.showinfo("Info", "Cập nhật sự kiện không thành công")
             return False
         else:
@@ -260,6 +301,7 @@ class adminGUI(object):
 
 class userGUI(object):
     def __init__(self, master):
+        master.withdraw()
         self.master = Toplevel(master)
         self.master.title("DANH SÁCH TRẬN ĐẤU") 
         self.master.geometry("700x400") 
@@ -267,14 +309,17 @@ class userGUI(object):
         self.sclient = sclient
         Label(self.master, text = "LIVE SCORE", fg = 'blue',font = ('Times', 30, 'bold')).pack(side = TOP, pady = 2)
         Label(self.master, text = "LIST SCORE", fg = 'blue',font = ('Times', 20)).pack(side = TOP, pady = 5)
-        Button(self.master, text = "Hiển thị danh sách trận đấu", command = self.listMatch).pack(side = TOP, pady = 5)
         self.topFrame = Frame(self.master)
         self.topFrame.pack(side = TOP, pady = 2, padx = 5)
-        Label(self.topFrame, text = "Match detail", font = ('Time', 11, 'bold')).pack(side = LEFT, padx = 2)
+        Button(self.topFrame, text = "List Match", command = self.listMatch).pack(side = LEFT, padx = 10)
+        Button(self.topFrame, text = "List Match RealTime", command = self.listMatchRealTime).pack(side = LEFT, pady = 5)
+        self.middleFrame = Frame(self.master)
+        self.middleFrame.pack(side = TOP, pady = 2, padx = 5)
+        Label(self.middleFrame, text = "Match detail", font = ('Time', 11, 'bold')).pack(side = LEFT, padx = 2)
         self.IDMVar = StringVar()
         self.IDMVar.set("Nhập ID Match")
-        IDMEntry = Entry(self.topFrame,textvariable= self.IDMVar, width = 50).pack(side = LEFT, padx = 2)
-        Button(self.topFrame, text = "Xem", command = self.matchDetailGUI).pack(side = LEFT)
+        IDMEntry = Entry(self.middleFrame,textvariable= self.IDMVar, width = 50).pack(side = LEFT, padx = 2)
+        Button(self.middleFrame, text = "Xem", command = self.matchDetailGUI).pack(side = LEFT)
         self.bottomFrame = Frame(self.master)
         self.bottomFrame.pack(side = TOP, fill = X )
         self.treev = ttk.Treeview(self.bottomFrame, selectmode ='browse')
@@ -294,12 +339,24 @@ class userGUI(object):
         self.treev.heading("3", text ="Team 1")
         self.treev.heading("4", text = "Score")
         self.treev.heading("5", text = "Team 2")
+        self.master.protocol("WM_DELETE_WINDOW", self.closeClient)
         self.master.mainloop()
 
+    def clearScreen(self):
+        for rec in self.treev.get_children():
+            self.treev.delete(rec)
+        return 
+
     def listMatch(self):
-        sendData(self.sclient, "LISTMT")
-        print("LISTMT")
+        self.clearScreen()
+        flag = sendData(self.sclient, "LISTMT")
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         data = receive(sclient)
+        if (data == -100):
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         data = json.loads(data)
         cnt = 0
         for mtch in data["list"]:
@@ -314,9 +371,15 @@ class userGUI(object):
         return
 
     def listMatchRealTime(self):
-        sendData(self.sclient, "LISTMRT")
-        print("LISTMRT")
+        self.clearScreen()
+        flag = sendData(self.sclient, "LISTMRT")
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         data = receive(sclient)
+        if (data == -100):
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         data = json.loads(data)
         cnt = 0
         for mtch in data["list"]:
@@ -372,13 +435,27 @@ class userGUI(object):
         self.treev1.heading("7", text = "Score")
         self.master1.mainloop()
 
+    #CloseClient
+    def closeClient(self):
+        sendData(sclient, "QUIT")
+        self.master.destroy()
+        closing()
+        
     def matchDetail(self):
-        sendData(self.sclient, "MTCDT")
+        flag = sendData(self.sclient, "MTCDT")
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         IDM = self.IDMVar.get()
-        sendData(self.sclient, IDM)
+        flag = sendData(self.sclient, IDM)
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         data = receive(sclient)
+        if (data == -100):
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         data = json.loads(data)
-        print(data)
         cnt = 0
         for mtch in data["events"]:
             mtch["id"] = IDM
@@ -418,19 +495,30 @@ class logInGUI(object):
         signInLabel = Label(self.master, text = "Nếu bạn chưa có tài khoản", font = ('Times', 12, 'italic')).pack(side = TOP, pady = 5)
         signInButton = Button(self.master, text = "SIGN IN", width = 10, height = 1, font = ('Times', 12, 'bold'), command = self.signInGUI)
         signInButton.pack(side = TOP)
-        #self.master.protocol("WM_DELETE_WINDOW", self.Closing)
+        self.master.protocol("WM_DELETE_WINDOW", self.closeClient)
         self.master.mainloop()
+
+    def closeClient(self):
+        sendData(sclient, "QUIT")
+        self.master.destroy()
+        closing()
 
     #Log In Func
     def logIn(self):
-        print("LOGIN")
-        sendData(self.sclient, "LOGIN")
+        flag = sendData(self.sclient, "LOGIN")
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         str = {"usr": self.userVar.get(), "psw": self.passVar.get()}
-        sendData(self.sclient,json.dumps(str))
-        print(self.userVar.get())
-        print(self.passVar.get())
+        flag = sendData(self.sclient,json.dumps(str))
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         signal = receive(self.sclient)
-        if (signal == '2'):
+        if (signal == -100):
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
+        elif (signal == '2'):
             messagebox.showinfo("Info", "Đăng nhập admin thành công")
             adminGUI(self.master)
             return True
@@ -472,8 +560,12 @@ class logInGUI(object):
         self.signInFunc = partial(self.signIn1)
         signInButton = Button(self.master1, text = "SIGN IN", width = 10, height = 1,font = ('Times', 12, 'bold'), command = self.signInFunc)
         signInButton.pack(side = TOP, pady = 5)
-        #self.master.protocol("WM_DELETE_WINDOW", self.Closing)
+        self.master1.protocol("WM_DELETE_WINDOW", self.closeSignIn)
         self.master1.mainloop()
+
+    def closeSignIn(self):
+        self.master1.destroy()
+        self.master.deiconify()
 
     #Sign In Client Confirm Func
     def signIn1(self):
@@ -486,14 +578,20 @@ class logInGUI(object):
 
     #Sign In to Server Func
     def signIn2(self):
-        sendData(self.sclient, "REGIST")
-        print("REGIST")
+        flag = sendData(self.sclient, "REGIST")
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         str = {"usr": self.userVar1.get(), "psw": self.passVar1.get()}
-        sendData(self.sclient,json.dumps(str))
-        print(self.userVar.get())
-        print(self.passVar.get())
+        flag = sendData(self.sclient,json.dumps(str))
+        if not flag:
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
         signal = receive(self.sclient)
-        if (signal == '1'):
+        if (signal == -100):
+            messagebox.showerror("Error", "Server đã ngừng kết nối")
+            return
+        elif (signal == '1'):
            messagebox.showinfo("Info", "Đăng kí thành công")
            self.master1.destroy()
            self.master.deiconify()
@@ -535,8 +633,10 @@ class clientGUI(object):
         logInGUI(self.master)
         return True
 
+
 #Main
 if __name__ == "__main__":
     root = Tk()
     window = clientGUI(root)
+    
     root.mainloop()

@@ -10,49 +10,12 @@ from tkinter.scrolledtext import ScrolledText
 from tkinter import ttk, VERTICAL, HORIZONTAL, N, S, E, W
 from functools import partial
 from server import*
+
 logger = logging.getLogger(__name__)
 
-
-NClient = 5                   # số client tối đa kết nối đồng thời đến server
-
-
-# class Clock(threading.Thread):
-#     """Class to display the time every seconds
-#     Every 5 seconds, the time is displayed using the logging.ERROR level
-#     to show that different colors are associated to the log levels
-#     """
-
-#     def __init__(self):
-#         super().__init__()
-#         self._stop_event = threading.Event()
-
-#     def run(self):
-#         logger.debug('Clock started')
-#         previous = -1
-#         while not self._stop_event.is_set():
-#             now = datetime.datetime.now()
-#             if previous != now.second:
-#                 previous = now.second
-#                 if now.second % 5 == 0:
-#                     level = logging.ERROR
-#                 else:
-#                     level = logging.INFO
-#                 logger.log(level, now)
-#             time.sleep(0.2)
-
-#     def stop(self):
-#         self._stop_event.set()
-
+NClient = 5                  # số client tối đa kết nối đồng thời đến server
 
 class QueueHandler(logging.Handler):
-    """Class to send logging records to a queue
-    It can be used from different threads
-    The ConsoleUi class polls this queue to display records in a ScrolledText widget
-    """
-    # Example from Moshe Kaplan: https://gist.github.com/moshekaplan/c425f861de7bbf28ef06
-    # (https://stackoverflow.com/questions/13318742/python-logging-to-tkinter-text-widget) is not thread safe!
-    # See https://stackoverflow.com/questions/43909849/tkinter-python-crashes-on-new-thread-trying-to-log-on-main-thread
-
     def __init__(self, log_queue):
         super().__init__()
         self.log_queue = log_queue
@@ -103,56 +66,6 @@ class ConsoleUi:
                 self.display(record)
         self.frame.after(100, self.poll_log_queue)
 
-
-# class FormUi:
-
-#     def __init__(self, frame):
-#         self.frame = frame
-#         # Create a combobbox to select the logging level
-#         values = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
-#         self.level = tk.StringVar()
-#         ttk.Label(self.frame, text='Level:').grid(column=0, row=0, sticky=W)
-#         self.combobox = ttk.Combobox(
-#             self.frame,
-#             textvariable=self.level,
-#             width=25,
-#             state='readonly',
-#             values=values
-#         )
-#         self.combobox.current(0)
-#         self.combobox.grid(column=1, row=0, sticky=(W, E))
-#         # Create a text field to enter a message
-#         self.message = tk.StringVar()
-#         ttk.Label(self.frame, text='Message:').grid(column=0, row=1, sticky=W)
-#         ttk.Entry(self.frame, textvariable=self.message, width=25).grid(column=1, row=1, sticky=(W, E))
-#         # Add a button to log the message
-#         self.button = ttk.Button(self.frame, text='Submit', command=self.submit_message)
-#         self.button.grid(column=1, row=2, sticky=W)
-
-#     def submit_message(self):
-#         # Get the logging level numeric value
-#         lvl = getattr(logging, self.level.get())
-#         logger.log(lvl, self.message.get())
-
-# class FormUi:
-
-#     def __init__(self, frame):
-#         self.frame = frame
-#         ttk.Label(self.frame, text = "Nhập số client cho phép kết nối: ").grid(column=0, row=0, sticky=W)
-#         self.nVar = StringVar()
-#         self.nEntry = ttk.Entry(self.frame,textvariable= self.nVar, width = 50).grid(column=0, row=4, sticky=W)
-#         nFunc = partial(self.submitNumThread)
-#         ttk.Button(self.frame, text = "Submit", command = nFunc).grid(column=0, row=6, sticky=W)
-
-#     def submitNumThread(self):
-#         global N
-#         N = self.nVar.get()
-#         #Get the logging level numeric value
-#         lvl = getattr(logging, self.level.get())
-#         logger.log(lvl, "Số client được kết nối tối đa là: ", N)
-#         print("Số client được kết nối tối đa là: ", N)
-#         return N
-
 class ThirdUi:
 
     def __init__(self, frame):
@@ -186,16 +99,13 @@ class App:
         # Initialize all frames
         self.form = ThirdUi(form_frame)
         self.console = ConsoleUi(console_frame)
-        #logger.log(logging.INFO,"Cho phép tối đa " + str(NClient) + " được kết nối.")
-        #self.clock = Clock()
-        #self.clock.start()
         self.server = Server(logger,NClient)
         self.root.protocol('WM_DELETE_WINDOW', self.quit)
         self.root.bind('<Control-q>', self.quit)
         signal.signal(signal.SIGINT, self.quit)
 
     def quit(self, *args):
-        #self.clock.stop()
+        self.server.closeServer()
         self.root.destroy()
 
 def submitNumThread(root, nVar):
