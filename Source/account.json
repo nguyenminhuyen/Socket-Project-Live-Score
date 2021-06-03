@@ -1,0 +1,16 @@
+{
+    "account": [
+        {
+            "usr": "admin",
+            "psw": "adm"
+        },
+        {
+            "usr": "thi",
+            "psw": "123"
+        },
+        {
+            "usr": "uyen",
+            "psw": "789"
+        }
+    ]
+}
