@@ -4,10 +4,10 @@ This is my project in Computer Network class. The project's outcome is a client-
 Link project's tasks: https://docs.google.com/document/d/112bVXlY76jDx6ycO_rqKQhqj19AS6U6eDC-gxFMqs5Q/edit?usp=sharing
 
 ## Team members 
-**Nguyen Le Bao Thi** 
+**Bao-Thi Nguyen-Le** 
 - Github: [@baothi250501](https://github.com/baothi250501)
 
-**Nguyen Minh Uyen**
+**Minh-Uyen Nguyen**
 - Github: [@nguyenminhuyen](https://github.com/nguyenminhuyen)
 
 ## How to Install
